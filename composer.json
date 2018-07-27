@@ -1,0 +1,17 @@
+{
+    "name": "sifnt/php-as-api-connector",
+    "description": "PHP Air-Stream API Connector",
+    "authors": [
+        {
+            "name": "Sam Burney",
+            "email": "sam@burney.io"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0",
+        "sifnt/sifnt-util": "dev-master",
+        "thesoftwarefanatics/php-html-parser": "^1.8.0",
+        "cosenary/simple-php-cache": "dev-master"
+    },
+    "minimum-stability": "dev"
+}
