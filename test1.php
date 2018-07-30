@@ -35,6 +35,11 @@ function make_api_call($api_url) {
         if(do_login()){
             $url = $api_root . $api_url;
 
+            // Hack because Rostrevor is *still* broken
+            if($api_url == 'nodes/472') {
+                return false;
+            }
+
             curl_setopt($curl, CURLOPT_URL, $url);
             $result = curl_exec($curl);
             if($result !== false) {
@@ -56,7 +61,7 @@ function make_api_call($api_url) {
 
         curl_close($curl);
 
-        $cache->store($api_url, $result, 86400);
+        $cache->store($api_url, $result, 86400 + rand(0, 86400));
         return ($result);
     }
 }
@@ -134,10 +139,14 @@ function do_login() {
     }
 }
 
+//sU::debug(make_api_call('nodes/472'));
+
 $nodes = json_decode(make_api_call('nodes?b'), true);
 $nodedata = [];
 
+$i = 0;
 foreach($nodes as $node) {
+//    echo $i . " " . $node['id'] . " " . $node['name'] .  "\n";
     $nodedetails = json_decode(make_api_call('nodes/' . $node['id']), true);
 
     $nodedata[$node['id']] = [
@@ -148,6 +157,8 @@ foreach($nodes as $node) {
         'elev' => $nodedetails['elevation'],
         'as' => $nodedetails['asNum'],
     ];
+
+    $i++;
 }
 ?>
 <html>
