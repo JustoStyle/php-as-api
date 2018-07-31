@@ -12,7 +12,7 @@ $asapi = new ASAPI([
 ]);
 
 $nodes_all = $asapi->call('nodes?b');
-//$nodes_all = [0 => ['id' => 899]]; $config['debug'] = 1;
+//$nodes_all = [0 => ['id' => 195]]; $config['debug'] = 1;
 
 echo "Fetching Node list...\n";
 $nodes_data = [];
@@ -21,7 +21,6 @@ foreach($nodes_all as $node_all) {
         // Get node data
         $data = $asapi->call("nodes/$node_id");
         if($data !== false) {
-
             // Build subnets array
             $subnets_data = [];
             $nodes_subnets_data = [];
@@ -31,11 +30,6 @@ foreach($nodes_all as $node_all) {
                     'addr' => ip2long($host['subnet']['addr']),
                     'mask' => $host['subnet']['mask'],
                     'type' => $host['subnet']['type'],
-                ];
-
-                $nodes_subnets_data[] = [
-                    'subnet_id' => $host['subnet']['id'],
-                    'node_id' => $host['node_id'],
                 ];
             }
             $subnets_data = array_values($subnets_data);
@@ -54,13 +48,25 @@ foreach($nodes_all as $node_all) {
             }
             $hosts_data = array_values($hosts_data);
 
+            // Build links array
+            $links_data = [];
+            foreach ($data['links'] as $link) {
+                $links_data[$link['id']] = [
+                    'id' => $link['id'],
+                    'name' => $link['name'],
+                    'type' => $link['type'],
+                    'freq' => $link['freq'],
+                ];
+            }
+            $links_data = array_values($links_data);
+
             // Build Node Data array
             $node_data = [
                 'node' => [
                     'id' => $data['id'],
                     'suburb_id' => isset($data['suburb']['id']) ? $data['suburb']['id'] : 0,
                     'user_id' => isset($data['manager']['id']) ? $data['manager']['id'] : 0,
-                    'status_id' => $data['status']['id'],
+                    'status_id' => isset($data['status']['id']) ? $data['status']['id'] : 0,
                     'name' => $data['name'],
                     'region' => $data['region'],
                     'zone' => $data['zone'],
@@ -81,12 +87,12 @@ foreach($nodes_all as $node_all) {
                     'name' => isset($data['manager']['id']) ? $data['manager']['username'] : 'UNSET',
                 ],
                 'status' => [
-                    'id' => $data['status']['id'],
-                    'name' => $data['status']['status'],
+                    'id' => isset($data['status']['id']) ? $data['status']['id'] : 0,
+                    'name' => isset($data['status']['status']) ? $data['status']['status'] : 'UNKNONW',
                 ],
                 'subnets' => $subnets_data,
                 'hosts' => $hosts_data,
-                'nodes_subnets' => $nodes_subnets_data,
+                'links' => $links_data,
             ];
 
             // Add to $nodes_data
@@ -99,6 +105,7 @@ foreach($nodes_all as $node_all) {
 if($config['debug']) {
     sU::debug($nodes_data);
 }
+//exit();
 
 // Update database with node data
 foreach ($nodes_data as $node_data) {
@@ -123,6 +130,16 @@ foreach ($nodes_data as $node_data) {
     // Host
     foreach($node_data['hosts'] as $host_data) {
         $host = Host::updateOrCreate(['id' => $host_data['id']], $host_data);
+    }
+
+    // Links
+    foreach($node_data['links'] as $link_data) {
+        $link = Link::updateOrCreate(['id' => $link_data['id']], $link_data);
+
+        // Associate link with node
+        $node = Node::find($node_data['node']['id']);
+        $link = Link::find($link_data['id']);
+        $node->link()->syncWithoutDetaching($link);
     }
 }
 

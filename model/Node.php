@@ -22,4 +22,9 @@ class Node extends Illuminate\Database\Eloquent\Model
     {
         return $this->belongsToMany('Subnet');
     }
+
+    public function link()
+    {
+        return $this->belongsToMany('Link');
+    }
 }

@@ -1,5 +1,3 @@
--- Adminer 4.6.2 MySQL dump
-
 SET NAMES utf8;
 SET time_zone = '+00:00';
 
@@ -107,4 +105,25 @@ CREATE TABLE `node_subnet` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 
--- 2018-07-31 03:50:02
+DROP TABLE IF EXISTS `links`;
+CREATE TABLE `links` (
+  `id` int(10) unsigned NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `type` varchar(64) NOT NULL,
+  `freq` int(10) unsigned DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+
+DROP TABLE IF EXISTS `link_node`;
+CREATE TABLE `link_node` (
+  `link_id` int(10) unsigned NOT NULL,
+  `node_id` int(10) unsigned NOT NULL,
+  UNIQUE KEY `link_id_node_id` (`link_id`,`node_id`),
+  KEY `node_id` (`node_id`),
+  KEY `link_id` (`link_id`),
+  CONSTRAINT `link_node_ibfk_1` FOREIGN KEY (`link_id`) REFERENCES `links` (`id`),
+  CONSTRAINT `link_node_ibfk_2` FOREIGN KEY (`node_id`) REFERENCES `nodes` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;

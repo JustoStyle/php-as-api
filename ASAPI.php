@@ -50,11 +50,6 @@ class ASAPI
         }
         else {
             if($this->doLogin()) {
-                // Hack because Rostrevor is *still* broken
-                if($api_url == 'nodes/472') {
-                    return false;
-                }
-
                 curl_setopt($this->ch, CURLOPT_URL, $api_call);
                 curl_setopt($this->ch, CURLOPT_POST, 0);
                 
@@ -75,6 +70,44 @@ class ASAPI
                         $result = curl_exec($this->ch);
                     }
                 }
+            }
+
+            // If this is a requerst for a node, and we have some data for it, return the small amount we have
+            if ($result !== false && strpos($api_url, 'nodes/') !== false) {
+                $node_id = substr($api_url, 6);
+
+                // Get full node list and pluck out the one we want
+                $nodes_data = $this->call('nodes?b');
+                foreach ($nodes_data as $node_data) {
+                    if($node_data['id'] == $node_id) {
+                        $node = [
+                            'id' => $node_id,
+                            'name' => $node_data['name'],
+                            'region' => 'UNKNOWN',
+                            'zone' => 'UNKNOWN',
+                            'lat' => $node_data['lat'],
+                            'lng' => $node_data['lng'],
+                            'elevation' => NULL,
+                            'antHeight' => NULL,
+                            'asNum' => NULL,
+                            'ord' => $node_data['ord'],
+                            'zabbixGroudId' => NULL,
+                            'suburb' => [],
+                            'manager' => [],
+                            'status' => [],
+                            'hosts' => [],
+                            'devices' => $node_data['devices'],
+                            'links' => $node_data['links'],
+                            'subnets' => [],
+                        ];
+
+                        $result = json_encode($node);
+                        break;
+                    }
+                }
+
+                // We haven't found that node, return false
+                return false;
             }
 
             // Record in cache for a week + random part of a week
