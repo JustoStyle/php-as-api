@@ -1,0 +1,13 @@
+<?php
+$config = [
+    'debug' => 0,
+];
+
+$db = [
+    'driver' => 'mysql',
+    'host' => 'localhost',
+    'db' => 'nodedb',
+    'user' => 'nodedb',
+    'pass' => 'password',
+    'prefix' => '',
+];

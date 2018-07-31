@@ -3,3 +3,4 @@ vendor/*
 cookiejar.txt
 composer.lock
 as-api-creds.secret
+config.php
