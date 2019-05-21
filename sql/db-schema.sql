@@ -1,10 +1,6 @@
 SET NAMES utf8;
 SET time_zone = '+00:00';
 
-DROP DATABASE IF EXISTS `nodedb_mirror`;
-CREATE DATABASE `nodedb_mirror` /*!40100 DEFAULT CHARACTER SET latin1 */;
-USE `nodedb_mirror`;
-
 DROP TABLE IF EXISTS `statuses`;
 CREATE TABLE `statuses` (
   `id` int(10) unsigned NOT NULL,
