@@ -1,6 +1,6 @@
 <?php
 require_once('vendor/autoload.php');
-require_once('../../as-api-creds.secret');
+require_once('include/config.php');
 require_once('ASAPI.php');
 
 $asapi = new ASAPI([

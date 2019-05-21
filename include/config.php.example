@@ -11,3 +11,6 @@ $db = [
     'pass' => 'password',
     'prefix' => '',
 ];
+
+$username = 'username';
+$password = 'password';
