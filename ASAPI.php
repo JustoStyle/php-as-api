@@ -22,6 +22,7 @@ class ASAPI
             CURLOPT_SSL_VERIFYPEER => 0,
             CURLOPT_RETURNTRANSFER => 1,
             CURLOPT_FOLLOWLOCATION => 1,
+            CURLOPT_TIMEOUT => 60,
 
             CURLOPT_COOKIEJAR => $this->cookie_file,
             CURLOPT_COOKIEFILE => $this->cookie_file,
@@ -72,12 +73,28 @@ class ASAPI
                 }
             }
 
-            // If this is a requerst for a node, and we have some data for it, return the small amount we have
-            if ($result !== false && strpos($api_url, 'nodes/') !== false) {
+            // Check for errors
+            // Error within CURL response
+            $result_json = json_decode($result, true);
+            if($result_json['error']) {
+                $result = false;
+            }
+
+            // Error within HTML body
+            $dom = new Dom;
+            $dom->load($result);
+
+            $tag = $dom->find('html');
+            if(sizeof($tag)) {
+                $result = false;
+            }
+
+            // If this is a request for a node, and we have some data for it, return the small amount we have
+            if ($result === false && strpos($api_url, 'nodes/') !== false) {
                 $node_id = substr($api_url, 6);
 
                 // Get full node list and pluck out the one we want
-                $nodes_data = $this->call('nodes?b');
+                $nodes_data = $this->call('nodes?b', $nocache);
                 foreach ($nodes_data as $node_data) {
                     if($node_data['id'] == $node_id) {
                         $node = [
@@ -105,9 +122,6 @@ class ASAPI
                         break;
                     }
                 }
-
-                // We haven't found that node, return false
-                return false;
             }
 
             // Record in cache for a week + random part of a week

@@ -8,7 +8,20 @@ $asapi = new ASAPI([
     'password' => $password,
 ]);
 
-$data = $asapi->call('nodes/195');
+// Enable or disable caching
+$nocache = false;
+
+// Ridgehaven - large working Node
+//$data = $asapi->call('nodes/195', $nocache);
+
+// Ridgehaven 2 - small Node
+//$data = $asapi->call('nodes/196', $nocache);
+
+// Rostrevor - large broken Node
+//$data = $asapi->call('nodes/472', $nocache);
+
+// Non-existent Node
+//$data = $asapi->call('nodes/700', $nocache);
 
 sU::debug($data);
 ?>
