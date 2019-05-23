@@ -87,7 +87,7 @@ foreach($nodes_all as $node_all) {
                 ],
                 'status' => [
                     'id' => isset($data['status']['id']) ? $data['status']['id'] : 0,
-                    'name' => isset($data['status']['status']) ? $data['status']['status'] : 'UNKNONW',
+                    'name' => isset($data['status']['status']) ? $data['status']['status'] : 'UNKNOWN',
                 ],
                 'subnets' => $subnets_data,
                 'hosts' => $hosts_data,
