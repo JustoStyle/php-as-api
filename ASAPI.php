@@ -76,7 +76,7 @@ class ASAPI
             // Check for errors
             // Error within CURL response
             $result_json = json_decode($result, true);
-            if($result_json['error']) {
+            if(@$result_json['error']) {
                 $result = false;
             }
 
@@ -96,7 +96,7 @@ class ASAPI
                 // Get full node list and pluck out the one we want
                 $nodes_data = $this->call('nodes?b', $nocache);
                 foreach ($nodes_data as $node_data) {
-                    if($node_data['id'] == $node_id) {
+                    if(@$node_data['id'] == $node_id) {
                         $node = [
                             'id' => $node_id,
                             'name' => $node_data['name'],
