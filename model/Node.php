@@ -25,6 +25,6 @@ class Node extends Illuminate\Database\Eloquent\Model
 
     public function link()
     {
-        return $this->belongsToMany('Link');
+        return $this->belongsToMany('Link')->withPivot('interface_id');
     }
 }

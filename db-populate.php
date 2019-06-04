@@ -11,7 +11,9 @@ $asapi = new ASAPI([
 ]);
 
 $nodes_all = $asapi->call('nodes?b');
-//$nodes_all = [0 => ['id' => 195]]; $config['debug'] = 1;
+//$nodes_all = [0 => ['id' => 195], 1 => ['id' => 824], 2 => ['id' => 472]];
+//$nodes_all = [0 => ['id' => 195]];
+//$config['debug'] = 1;
 
 echo "Fetching Node list...\n";
 $nodes_data = [];
@@ -20,6 +22,8 @@ foreach($nodes_all as $node_all) {
         // Get node data
         $data = $asapi->call("nodes/$node_id");
         if($data !== false) {
+            echo "Processing " . $data['id'] . ' ' . $data['name'] . "\n";
+
             // Build subnets array
             $subnets_data = [];
             $nodes_subnets_data = [];
@@ -46,6 +50,42 @@ foreach($nodes_all as $node_all) {
                 ];
             }
             $hosts_data = array_values($hosts_data);
+
+            // Build interfaces array
+            $interfaces_data = [];
+            $interfaces_links_data = [];
+            foreach ($data['devices'] as $device) {
+                foreach ($device['interfaces'] as $interface) {
+                    // Only support AP, Client and Backbone interfaces modes
+                    if (($interface['radio']['mode'] == 'AP' || $interface['radio']['mode'] == 'CL' || $interface['radio']['mode'] == 'BB')) {
+                        // Build interface_links array
+                        $link_ids = [];
+                        if(@sizeof($interface['hosts'][0]['links'])) {
+                            foreach ($interface['hosts'][0]['links'] as $host_link) {
+                                $link_ids[] = $host_link['id'];
+                            }
+                        }
+                        $interfaces_links_data[$interface['id']] = [
+                            'id' => $interface['id'],
+                            'link_ids' => $link_ids,
+                        ];
+
+                        // Build interfaces_data array
+                        $interfaces_data[$interface['id']] = [
+                            'id' => $interface['id'],
+                            'host_id' => @$interface['hosts'][0]['id'] ? $interface['hosts'][0]['id'] : NULL,
+                            'type' => $interface['type'],
+                            'ssid' => $interface['radio']['ssid'],
+                            'mode' => $interface['radio']['mode'],
+                            'protocol' => $interface['radio']['band'],
+                            'freq' => $interface['radio']['freq'],
+                            'passphrase' => @$interface['radio']['nwkey'] ? $interface['radio']['nwkey'] : '',
+                        ];
+                    }
+                }
+            }
+            $interfaces_data = array_values($interfaces_data);
+            $interfaces_links_data = array_values($interfaces_links_data);
 
             // Build links array
             $links_data = [];
@@ -92,6 +132,8 @@ foreach($nodes_all as $node_all) {
                 'subnets' => $subnets_data,
                 'hosts' => $hosts_data,
                 'links' => $links_data,
+                'interfaces' => $interfaces_data,
+                'interfaces_links' => $interfaces_links_data,
             ];
 
             // Add to $nodes_data
@@ -103,8 +145,8 @@ foreach($nodes_all as $node_all) {
 // Output test data
 if($config['debug']) {
     sU::debug($nodes_data);
+    exit();
 }
-//exit();
 
 // Update database with node data
 foreach ($nodes_data as $node_data) {
@@ -126,9 +168,14 @@ foreach ($nodes_data as $node_data) {
         $node->subnet()->syncWithoutDetaching($subnet);
     }
 
-    // Host
+    // Hosts
     foreach($node_data['hosts'] as $host_data) {
         $host = Host::updateOrCreate(['id' => $host_data['id']], $host_data);
+    }
+
+    // Interfaces
+    foreach($node_data['interfaces'] as $interface_data) {
+        $interface = NetworkInterface::updateOrCreate(['id' => $interface_data['id']], $interface_data);
     }
 
     // Links
@@ -140,6 +187,18 @@ foreach ($nodes_data as $node_data) {
         $link = Link::find($link_data['id']);
         $node->link()->syncWithoutDetaching($link);
     }
+
+    // Associate Interfaces with Links
+    foreach($node_data['interfaces_links'] as $interfaces_link_data) {
+        foreach($interfaces_link_data['link_ids'] as $link_id) {
+            $node = Node::find($node_data['node']['id']);
+            $link = Link::find($link_id);
+
+            $link_node = $node->link->find($link_id)->pivot;
+            $link_node->interface_id = $interfaces_link_data['id'];
+            $link_node->save();
+        }
+    } 
 }
 
 echo "Done.\n";
