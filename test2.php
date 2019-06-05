@@ -14,7 +14,7 @@ $asapi = new ASAPI([
 $nocache = false;
 
 if ($node_id) {
-    $data = $asapi->call('nodes/' + $node_id, $nocache);
+    $data = $asapi->call('nodes/' . $node_id, $nocache);
 }
 
 // Ridgehaven - large working Node
