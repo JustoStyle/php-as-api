@@ -37,8 +37,9 @@ foreach($nodes_all as $node_all) {
             }
             $subnets_data = array_values($subnets_data);
 
-            // Build hosts array
+            // Build hosts and host_aliases arrays
             $hosts_data = [];
+            $host_aliases_data = [];
             foreach ($data['hosts'] as $host) {
                 $hosts_data[$host['id']] = [
                     'id' => $host['id'],
@@ -48,8 +49,17 @@ foreach($nodes_all as $node_all) {
                     'fqdn' => $host['fqdn'],
                     'addr' => ip2long($host['addr']),
                 ];
+
+                foreach ($host['aliases'] as $host_alias) {
+                    $host_aliases_data[$host_alias['id']] = [
+                        'id' => $host_alias['id'],
+                        'host_id' => $host['id'],
+                        'name' => $host_alias['name'],
+                    ];
+                }
             }
             $hosts_data = array_values($hosts_data);
+            $host_aliases_data = array_values($host_aliases_data);
 
             // Build interfaces array
             $interfaces_data = [];
@@ -131,6 +141,7 @@ foreach($nodes_all as $node_all) {
                 ],
                 'subnets' => $subnets_data,
                 'hosts' => $hosts_data,
+                'host_aliases' => $host_aliases_data,
                 'links' => $links_data,
                 'interfaces' => $interfaces_data,
                 'interfaces_links' => $interfaces_links_data,
@@ -171,6 +182,11 @@ foreach ($nodes_data as $node_data) {
     // Hosts
     foreach($node_data['hosts'] as $host_data) {
         $host = Host::updateOrCreate(['id' => $host_data['id']], $host_data);
+    }
+
+    // HostsAliases
+    foreach($node_data['host_aliases'] as $host_alias_data) {
+        $host_alias = HostAlias::updateOrCreate(['id' => $host_alias_data['id']], $host_alias_data);
     }
 
     // Interfaces
