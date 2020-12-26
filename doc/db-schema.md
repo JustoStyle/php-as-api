@@ -44,5 +44,8 @@
 - fqdn
 - addr
 
-
+## host_aliases
+- id
+- host_id
+- name
 

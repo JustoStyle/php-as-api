@@ -124,8 +124,8 @@ class ASAPI
                 }
             }
 
-            // Record in cache for a week + random part of a week
-            $this->cache->store($api_url, $result, 604800 + rand(0, 604800));
+            // Record in cache for a dat + random part of an hour
+            $this->cache->store($api_url, $result, 86400 + rand(0, 3600));
 
             $json = $result;
         }
