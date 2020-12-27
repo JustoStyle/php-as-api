@@ -7,9 +7,18 @@ require_once('ASAPI.php');
 
 $data = array();
 
-$nodeData = Node::where('asNum', '<>', '0')->get();
+$nodeData = Node::where('id', '=', 1)->with([
+    'user',
+    'status',
+    'suburb',
+    'subnet',
+    'subnet.host',
+    'subnet.host.alias',
+    'subnet.host.interface',
+    'link',
+])->get();
 // $data = Node::all();
 $data['count'] = count($nodeData);
 $data['nodes'] = $nodeData;
 
-echo json_encode($data);
+echo json_encode($data, JSON_PRETTY_PRINT);
