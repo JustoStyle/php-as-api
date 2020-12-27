@@ -5,8 +5,9 @@ require_once('vendor/autoload.php');
 require_once('include/database.php');
 require_once('ASAPI.php');
 
-$data = Node::where('asNum', '<>', '0')->get();
+$nodeData = Node::where('asNum', '<>', '0')->get();
 // $data = Node::all();
-$data[count] = count($data);
+$data['count'] = count($nodeData);
+$data['nodes'] = $nodeData;
 
-echo json_encode($data, JSON_PRETTY_PRINT);
+print_r(json_encode($data, JSON_PRETTY_PRINT));
