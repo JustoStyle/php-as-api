@@ -12,4 +12,4 @@ $nodeData = Node::where('asNum', '<>', '0')->get();
 $data['count'] = count($nodeData);
 $data['nodes'] = $nodeData;
 
-print_r(json_encode($data, JSON_PRETTY_PRINT));
+echo json_encode($data);
