@@ -76,7 +76,7 @@ CREATE TABLE `host_aliases` (
   `name` text,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 DROP TABLE IF EXISTS `group_user`;
 CREATE TABLE `group_user` (
